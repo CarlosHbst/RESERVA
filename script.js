@@ -1,194 +1,249 @@
 // Configurações
 const CONFIG = {
-    SYSTEM_URL: "https://script.google.com/a/macros/joinville.sc.gov.br/s/AKfycbw58HPHL7E18bhmZSlLBMaxXX6WX_toKNMLaclJE01XOFGaOxB6pHFWE9F2MWp6ysMEPw/exec",
+    SYSTEM_URL: "https://script.google.com/a/macros/joinville.sc.gov.br/SEU_ID_AQUI/exec",
     DOMAIN_REQUIRED: "joinville.sc.gov.br",
-    CHECK_INTERVAL: 2000,
-    MAX_RETRIES: 3
+    ACCOUNT_SWITCH_URLS: {
+        ADD_ACCOUNT: "https://accounts.google.com/AddSession",
+        ACCOUNT_CHOOSER: "https://accounts.google.com/AccountChooser",
+        SPECIFIC_DOMAIN: "https://accounts.google.com/AccountChooser?continue=https://drive.google.com&hl=pt-BR"
+    }
 };
 
 // Estado do sistema
 let state = {
-    currentRetry: 0,
-    isChecking: false,
-    lastStatus: null
-};
-
-// Elementos DOM
-const elements = {
-    statusCard: null,
-    accessBtn: null,
-    mobileSection: null
+    selectedAccountType: null,
+    isSwitching: false
 };
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
-    initializeElements();
-    checkInitialAccess();
-    setupMobileDetection();
+    initializeEventListeners();
+    showWelcomeMessage();
 });
 
-function initializeElements() {
-    elements.statusCard = document.getElementById('statusCard');
-    elements.accessBtn = document.getElementById('accessBtn');
-    elements.mobileSection = document.getElementById('mobileSection');
+function initializeEventListeners() {
+    // Hover effects para cards de opção
+    const optionCards = document.querySelectorAll('.option-card');
+    optionCards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            if (!card.classList.contains('selected')) {
+                card.style.transform = 'translateY(-5px)';
+            }
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            if (!card.classList.contains('selected')) {
+                card.style.transform = 'translateY(0)';
+            }
+        });
+    });
 }
 
-function checkInitialAccess() {
-    updateStatus('loading', 'Verificando configuração de acesso...');
+function selectAccount(type) {
+    const optionCards = document.querySelectorAll('.option-card');
+    const selectedAccountDiv = document.getElementById('selectedAccount');
+    const accountInfoDiv = document.getElementById('accountInfo');
+    const accessBtn = document.getElementById('accessBtn');
     
-    // Simula verificação (em produção, pode ser mais complexa)
+    // Remove seleção anterior
+    optionCards.forEach(card => card.classList.remove('selected'));
+    
+    // Adiciona seleção atual
+    event.currentTarget.classList.add('selected');
+    event.currentTarget.classList.add('pulse');
+    
+    state.selectedAccountType = type;
+    
+    // Atualiza informações da conta selecionada
+    if (type === 'institutional') {
+        accountInfoDiv.innerHTML = `
+            <div>
+                <strong>Conta Institucional</strong><br>
+                <span style="color: #666;">@joinville.sc.gov.br</span>
+            </div>
+        `;
+        accessBtn.innerHTML = '🏢 Acessar com Conta Institucional';
+    } else {
+        accountInfoDiv.innerHTML = `
+            <div>
+                <strong>Adicionar/Selecionar Conta</strong><br>
+                <span style="color: #666;">Você poderá escolher a conta ao acessar</span>
+            </div>
+        `;
+        accessBtn.innerHTML = '👤 Acessar e Escolher Conta';
+    }
+    
+    // Mostra informações da conta selecionada
+    selectedAccountDiv.style.display = 'block';
+    selectedAccountDiv.classList.add('fade-in');
+    
+    // Remove animação pulse após execução
     setTimeout(() => {
-        if (isMobileDevice()) {
-            updateStatus('warning', 'Dispositivo móvel detectado. Use o Chrome para melhor experiência.');
-            showMobileSection();
-        } else {
-            updateStatus('info', 'Clique em "Acessar Sistema" quando estiver com a conta institucional logada.');
+        event.currentTarget.classList.remove('pulse');
+    }, 500);
+    
+    updateButtonStates();
+}
+
+function switchAccount() {
+    state.isSwitching = true;
+    
+    // Abre o seletor de contas do Google em nova aba
+    const accountWindow = window.open(CONFIG.ACCOUNT_SWITCH_URLS.ADD_ACCOUNT, '_blank');
+    
+    showNotification('🔄 Abrindo seletor de contas Google...', 'info');
+    
+    // Dá foco na janela após um breve delay
+    setTimeout(() => {
+        try {
+            if (accountWindow && !accountWindow.closed) {
+                accountWindow.focus();
+            }
+        } catch (e) {
+            // Ignora erro de foco entre domínios
         }
-        
-        enableAccessButton();
+    }, 1000);
+    
+    // Atualiza estado após algum tempo
+    setTimeout(() => {
+        state.isSwitching = false;
+        showNotification('✅ Seletor de contas aberto. Adicione ou selecione uma conta.', 'success');
     }, 2000);
 }
 
-function updateStatus(type, message) {
-    const icons = {
-        loading: '⏳',
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    
-    elements.statusCard.innerHTML = `
-        <div class="status-${type}">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">${icons[type]}</div>
-            <p>${message}</p>
-        </div>
-    `;
-    
-    elements.statusCard.className = `status-card status-${type}`;
-}
-
-function enableAccessButton() {
-    elements.accessBtn.disabled = false;
-    elements.accessBtn.innerHTML = '✅ Acessar Sistema';
-}
-
-function handleLogout() {
-    updateStatus('info', 'Redirecionando para logout...');
-    
-    // Abre múltiplas URLs de logout para garantir
-    const logoutUrls = [
-        'https://accounts.google.com/Logout',
-        'https://mail.google.com/mail/logout',
-        'https://drive.google.com/logout'
-    ];
-    
-    logoutUrls.forEach(url => {
-        window.open(url, '_blank');
-    });
-    
-    setTimeout(() => {
-        alert('Logout realizado. Agora entre com sua conta @joinville.sc.gov.br e retorne a esta página.');
-        updateStatus('success', 'Pronto! Agora entre com @joinville.sc.gov.br');
-    }, 1000);
-}
-
 function handleAccess() {
-    if (state.isChecking) return;
-    
-    state.isChecking = true;
-    state.currentRetry = 0;
-    
-    updateStatus('loading', 'Tentando acessar o sistema...');
-    elements.accessBtn.disabled = true;
-    elements.accessBtn.innerHTML = '⏳ Acessando...';
-    
-    attemptAccess();
-}
-
-function attemptAccess() {
-    if (state.currentRetry >= CONFIG.MAX_RETRIES) {
-        updateStatus('error', 'Não foi possível acessar. Verifique se está logado com a conta correta.');
-        elements.accessBtn.disabled = false;
-        elements.accessBtn.innerHTML = '🔄 Tentar Novamente';
-        state.isChecking = false;
+    if (!state.selectedAccountType) {
+        showNotification('⚠️ Selecione uma opção de conta primeiro', 'warning');
         return;
     }
     
-    state.currentRetry++;
+    const accessBtn = document.getElementById('accessBtn');
+    const originalText = accessBtn.innerHTML;
     
-    const systemWindow = window.open(CONFIG.SYSTEM_URL, '_blank');
+    // Feedback visual
+    accessBtn.innerHTML = '⏳ Redirecionando...';
+    accessBtn.disabled = true;
     
-    // Verificação simplificada de acesso
+    showNotification('🎯 Abrindo sistema...', 'info');
+    
+    // Estratégias diferentes baseadas na seleção
+    let systemUrl = CONFIG.SYSTEM_URL;
+    
+    if (state.selectedAccountType === 'add') {
+        // Adiciona parâmetros para forçar escolha de conta
+        systemUrl += '?authuser=0'; // Força seleção de conta
+    }
+    
+    // Abre o sistema
+    const systemWindow = window.open(systemUrl, '_blank');
+    
+    // Tenta dar foco na janela do sistema
     setTimeout(() => {
-        if (!systemWindow || systemWindow.closed) {
-            updateStatus('warning', `Tentativa ${state.currentRetry}/${CONFIG.MAX_RETRIES}: Acesso pode ter sido bloqueado`);
-            attemptAccess();
-        } else {
-            updateStatus('success', 'Sistema aberto com sucesso!');
-            elements.accessBtn.innerHTML = '✅ Acesso Concedido';
-            state.isChecking = false;
-            
-            // Foca na janela do sistema
-            try {
+        try {
+            if (systemWindow && !systemWindow.closed) {
                 systemWindow.focus();
-            } catch (e) {
-                // Ignora erro de foco entre domínios
+                showNotification('✅ Sistema aberto! Verifique se está com a conta correta.', 'success');
             }
+        } catch (e) {
+            // Ignora erro de foco
         }
-    }, CONFIG.CHECK_INTERVAL);
+        
+        // Restaura botão
+        accessBtn.innerHTML = originalText;
+        accessBtn.disabled = false;
+    }, 3000);
+}
+
+function openAccountSwitchMobile() {
+    if (isMobileDevice()) {
+        // URLs específicas para mobile
+        const mobileAccountUrl = 'https://accounts.google.com/AccountChooser?continue=https://drive.google.com&hl=pt-BR';
+        
+        // Tenta abrir no Chrome primeiro
+        if (navigator.userAgent.includes('Chrome')) {
+            window.location.href = `intent://accounts.google.com/AccountChooser#Intent;end`;
+        } else {
+            window.open(mobileAccountUrl, '_blank');
+        }
+        
+        showNotification('📱 Abrindo gerenciador de contas...', 'info');
+    } else {
+        switchAccount();
+    }
+}
+
+function showWelcomeMessage() {
+    setTimeout(() => {
+        showNotification('👋 Selecione como deseja acessar o sistema', 'info');
+    }, 1000);
+}
+
+function showNotification(message, type = 'info') {
+    // Cria notificação temporária
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    // Estilos da notificação
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#4CAF50' : type === 'warning' ? '#FF9800' : type === 'error' ? '#F44336' : '#2196F3'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 1000;
+        max-width: 400px;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remove automaticamente após 5 segundos
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+function updateButtonStates() {
+    const accessBtn = document.getElementById('accessBtn');
+    accessBtn.disabled = !state.selectedAccountType;
 }
 
 function isMobileDevice() {
     return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
-function setupMobileDetection() {
-    if (isMobileDevice()) {
-        showMobileSection();
+// CSS para animações de notificação
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
     }
-}
-
-function showMobileSection() {
-    if (elements.mobileSection) {
-        elements.mobileSection.style.display = 'block';
+    
+    .notification-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
-}
-
-function openInChrome() {
-    if (isMobileDevice()) {
-        const chromeUrl = `googlechrome://navigate?url=${encodeURIComponent(window.location.href)}`;
-        window.location.href = chromeUrl;
-        
-        // Fallback
-        setTimeout(() => {
-            window.open(CONFIG.SYSTEM_URL, '_blank');
-        }, 1000);
+    
+    .notification-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        margin-left: 10px;
     }
-}
-
-function openTroubleshoot() {
-    const troubleshootWindow = window.open('', '_blank');
-    troubleshootWindow.document.write(`
-        <html>
-            <head><title>Guia de Solução de Problemas</title></head>
-            <body>
-                <h1>Guia de Solução de Problemas</h1>
-                <h2>Problemas Comuns e Soluções:</h2>
-                <ol>
-                    <li><strong>Não consigo trocar de conta:</strong> Use uma janela anônima/privada</li>
-                    <li><strong>Acesso negado:</strong> Verifique se o email é @joinville.sc.gov.br</li>
-                    <li><strong>Página não carrega:</strong> Limpe cache e cookies do navegador</li>
-                    <li><strong>Problemas no mobile:</strong> Use o navegador Chrome</li>
-                    <li><strong>Sistema não abre:</strong> Verifique se há bloqueadores de pop-up</li>
-                </ol>
-                <button onclick="window.close()">Fechar</button>
-            </body>
-        </html>
-    `);
-}
-
-// Utilitários para debug
-function debug(message) {
-    console.log(`[Sistema Acesso] ${message}`);
-}
+`;
+document.head.appendChild(style);
