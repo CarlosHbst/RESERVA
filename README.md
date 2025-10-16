@@ -1,23 +1,20 @@
-# Sistema de Acesso Institucional
+# Sistema de Troca de Contas Google
 
-Sistema intermediário para controle de acesso a Apps Script institucionais.
+Sistema intermediário para acesso a Apps Script institucionais com troca de contas sem logout.
 
-## Funcionalidades
+## 🚀 Funcionalidades
 
-- ✅ Verificação de domínio institucional
-- ✅ Interface responsiva para desktop e mobile
-- ✅ Guia de solução de problemas
-- ✅ Múltiplas tentativas de acesso
-- ✅ Logout assistido
+- ✅ **Troca de contas** sem fazer logout
+- ✅ **Seletor oficial Google** para adicionar contas
+- ✅ **Interface responsiva** para desktop e mobile
+- ✅ **Feedback visual** em tempo real
+- ✅ **Otimizado para performance**
+- ✅ **Acessibilidade** completa
 
-## Configuração
+## 🛠️ Configuração
 
-1. Substitua `SEU_ID_AQUI` no arquivo `script.js`
-2. Adicione seu logo como `logo.png`
-3. Configure o GitHub Pages
+1. **Substitua** `SEU_ID_AQUI` no arquivo `script.js`
+2. **Faça upload** dos 3 arquivos no GitHub
+3. **Ative GitHub Pages** nas configurações do repositório
 
-## Tecnologias
-
-- HTML5, CSS3, JavaScript
-- GitHub Pages
-- Design responsivo
+## 📁 Estrutura de Arquivos
