@@ -1,6 +1,6 @@
 // Configurações
 const CONFIG = {
-    SYSTEM_URL: "https://script.google.com/a/macros/joinville.sc.gov.br/SEU_ID_AQUI/exec",
+    SYSTEM_URL: "https://script.google.com/a/macros/joinville.sc.gov.br/s/AKfycbw58HPHL7E18bhmZSlLBMaxXX6WX_toKNMLaclJE01XOFGaOxB6pHFWE9F2MWp6ysMEPw/exec",
     DOMAIN_REQUIRED: "joinville.sc.gov.br",
     CHECK_INTERVAL: 2000,
     MAX_RETRIES: 3
