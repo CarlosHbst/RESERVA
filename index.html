@@ -16,55 +16,68 @@
         </header>
 
         <div class="card">
-            <h2>🔐 Verificação de Acesso</h2>
+            <h2>🔐 Selecione a Conta de Acesso</h2>
             
-            <div class="status-card" id="statusCard">
-                <div class="status-loading">
-                    <div class="spinner"></div>
-                    <p>Verificando seu acesso...</p>
+            <div class="account-selection">
+                <div class="account-options">
+                    <div class="option-card" onclick="selectAccount('institutional')">
+                        <div class="option-icon">🏢</div>
+                        <h3>Conta Institucional</h3>
+                        <p>@joinville.sc.gov.br</p>
+                        <div class="checkmark"></div>
+                    </div>
+                    
+                    <div class="option-card" onclick="selectAccount('add')">
+                        <div class="option-icon">👤</div>
+                        <h3>Adicionar Conta</h3>
+                        <p>Trocar ou adicionar outra conta Google</p>
+                        <div class="checkmark"></div>
+                    </div>
+                </div>
+
+                <div class="selected-account" id="selectedAccount" style="display: none;">
+                    <h4>Conta Selecionada:</h4>
+                    <div class="account-info" id="accountInfo"></div>
                 </div>
             </div>
 
-            <div class="steps">
-                <h3>📋 Para acessar o sistema:</h3>
-                <ol>
-                    <li>Certifique-se de estar logado com <strong>@joinville.sc.gov.br</strong></li>
-                    <li>Se não estiver, faça logout da conta atual</li>
-                    <li>Entre com sua conta institucional</li>
-                    <li>Clique no botão de acesso abaixo</li>
-                </ol>
-            </div>
-
             <div class="actions">
-                <button class="btn btn-logout" onclick="handleLogout()">
-                    🚪 Fazer Logout
+                <button class="btn btn-switch" onclick="switchAccount()">
+                    🔄 Trocar/Adicionar Conta Google
                 </button>
-                <button class="btn btn-access" onclick="handleAccess()" id="accessBtn" disabled>
+                <button class="btn btn-access" onclick="handleAccess()" id="accessBtn">
                     ✅ Acessar Sistema
                 </button>
             </div>
 
-            <div class="mobile-section" id="mobileSection" style="display: none;">
+            <div class="instructions">
+                <h4>💡 Como funciona:</h4>
+                <ul>
+                    <li>Selecione "Adicionar Conta" para trocar sem fazer logout</li>
+                    <li>O Google permitirá escolher entre contas existentes ou adicionar nova</li>
+                    <li>Seu login atual será mantido</li>
+                    <li>Após trocar, retorne e acesse o sistema</li>
+                </ul>
+            </div>
+
+            <div class="mobile-section">
                 <h4>📱 Acesso Mobile</h4>
-                <button class="btn btn-mobile" onclick="openInChrome()">
-                    Abrir no Chrome
+                <button class="btn btn-mobile" onclick="openAccountSwitchMobile()">
+                    Trocar Conta no Mobile
                 </button>
             </div>
 
             <div class="help-section">
                 <details>
-                    <summary>🆘 Precisa de ajuda?</summary>
+                    <summary>🆘 Precisa de ajuda com contas?</summary>
                     <div class="help-content">
-                        <p><strong>Problemas comuns:</strong></p>
+                        <p><strong>Gerencie múltiplas contas Google:</strong></p>
                         <ul>
-                            <li>Use o navegador Chrome</li>
-                            <li>Tente uma janela anônima/privada</li>
-                            <li>Limpe cache e cookies</li>
-                            <li>Verifique se o email está correto</li>
+                            <li>Você pode ter várias contas logadas simultaneamente</li>
+                            <li>Selecione qual usar em cada acesso</li>
+                            <li>Não é necessário fazer logout da conta atual</li>
+                            <li>Ideal para quem usa conta pessoal e institucional</li>
                         </ul>
-                        <button class="btn btn-help" onclick="openTroubleshoot()">
-                            Guia de Solução de Problemas
-                        </button>
                     </div>
                 </details>
             </div>
@@ -72,7 +85,7 @@
 
         <footer>
             <p>Prefeitura Municipal de Joinville &copy; 2024</p>
-            <p class="version">v1.0</p>
+            <p class="version">v2.0 - Sistema de Troca de Contas</p>
         </footer>
     </div>
 
