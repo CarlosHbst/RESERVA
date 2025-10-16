@@ -1,97 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-    <title>Acesso ao Sistema Institucional</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            max-width: 600px; 
-            margin: 50px auto; 
-            padding: 20px;
-            text-align: center;
-        }
-        .btn { 
-            background: #4285f4; 
-            color: white; 
-            padding: 15px 30px; 
-            border: none; 
-            border-radius: 5px; 
-            cursor: pointer; 
-            font-size: 16px; 
-            margin: 10px;
-        }
-        .steps { 
-            text-align: left; 
-            background: #f9f9f9; 
-            padding: 20px; 
-            border-radius: 5px; 
-            margin: 20px 0;
-        }
-    </style>
+    <title>Sistema Institucional - Prefeitura de Joinville</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
-    <h2>🔐 Acesso ao Sistema</h2>
-    <p><strong>Domínio requerido:</strong> @joinville.sc.gov.br</p>
-    
-    <div class="steps">
-        <h3>📋 Passos para Acesso:</h3>
-        <ol>
-            <li>Faça logout da conta atual</li>
-            <li>Entre com email @joinville.sc.gov.br</li>
-            <li>Clique no botão abaixo para acessar</li>
-        </ol>
-    </div>
+    <div class="container">
+        <header>
+            <img src="logo.png" alt="Logo Joinville" class="logo">
+            <h1>Sistema Institucional</h1>
+            <p class="domain-required">@joinville.sc.gov.br</p>
+        </header>
 
-    <div>
-        <button class="btn" onclick="fazerLogout()">🚪 Fazer Logout Primeiro</button>
-        <button class="btn" onclick="acessarSistema()">✅ Já estou com a conta correta</button>
-    </div>
-
-    <div style="margin-top: 30px; font-size: 14px; color: #666;">
-        <p><strong>Problemas?</strong> Tente em uma janela anônima/privada</p>
-    </div>
-
-    <script>
-        const SISTEMA_URL = "https://script.google.com/a/macros/joinville.sc.gov.br/s/AKfycbw58HPHL7E18bhmZSlLBMaxXX6WX_toKNMLaclJE01XOFGaOxB6pHFWE9F2MWp6ysMEPw/exec";
-
-        function fazerLogout() {
-            // Abre múltiplas opções para garantir logout
-            window.open('https://accounts.google.com/Logout', '_blank');
-            window.open('https://mail.google.com/mail/logout', '_blank');
+        <div class="card">
+            <h2>🔐 Verificação de Acesso</h2>
             
-            setTimeout(() => {
-                alert('Agora entre com sua conta @joinville.sc.gov.br e retorne a esta página');
-            }, 1000);
-        }
-
-        function acessarSistema() {
-            // Abre o sistema em nova aba
-            window.open(SISTEMA_URL, '_blank');
-            
-            // Mostra instruções adicionais
-            alert('Sistema aberto! Se não carregar corretamente, verifique se está logado com @joinville.sc.gov.br');
-        }
-
-        // Detectar se está em dispositivo móvel
-        function isMobile() {
-            return /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
-        // Ação especial para mobile
-        if (isMobile()) {
-            document.body.innerHTML += `
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 20px;">
-                    <strong>📱 Dispositivo Móvel:</strong> Recomendamos usar o navegador Chrome e 
-                    <a href="#" onclick="abrirAppChrome()">abrir este link no Chrome</a>
+            <div class="status-card" id="statusCard">
+                <div class="status-loading">
+                    <div class="spinner"></div>
+                    <p>Verificando seu acesso...</p>
                 </div>
-            `;
-        }
+            </div>
 
-        function abrirAppChrome() {
-            // Tenta abrir no Chrome especificamente
-            window.open('googlechrome://navigate?url=' + encodeURIComponent(window.location.href));
-        }
-    </script>
+            <div class="steps">
+                <h3>📋 Para acessar o sistema:</h3>
+                <ol>
+                    <li>Certifique-se de estar logado com <strong>@joinville.sc.gov.br</strong></li>
+                    <li>Se não estiver, faça logout da conta atual</li>
+                    <li>Entre com sua conta institucional</li>
+                    <li>Clique no botão de acesso abaixo</li>
+                </ol>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-logout" onclick="handleLogout()">
+                    🚪 Fazer Logout
+                </button>
+                <button class="btn btn-access" onclick="handleAccess()" id="accessBtn" disabled>
+                    ✅ Acessar Sistema
+                </button>
+            </div>
+
+            <div class="mobile-section" id="mobileSection" style="display: none;">
+                <h4>📱 Acesso Mobile</h4>
+                <button class="btn btn-mobile" onclick="openInChrome()">
+                    Abrir no Chrome
+                </button>
+            </div>
+
+            <div class="help-section">
+                <details>
+                    <summary>🆘 Precisa de ajuda?</summary>
+                    <div class="help-content">
+                        <p><strong>Problemas comuns:</strong></p>
+                        <ul>
+                            <li>Use o navegador Chrome</li>
+                            <li>Tente uma janela anônima/privada</li>
+                            <li>Limpe cache e cookies</li>
+                            <li>Verifique se o email está correto</li>
+                        </ul>
+                        <button class="btn btn-help" onclick="openTroubleshoot()">
+                            Guia de Solução de Problemas
+                        </button>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <footer>
+            <p>Prefeitura Municipal de Joinville &copy; 2024</p>
+            <p class="version">v1.0</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
