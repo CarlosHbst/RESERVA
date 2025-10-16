@@ -9,6 +9,8 @@
             --primary-color: #1a73e8;
             --primary-dark: #0d47a1;
             --success-color: #34a853;
+            --warning-color: #fbbc05;
+            --error-color: #ea4335;
             --text-color: #202124;
             --bg-color: #f8f9fa;
             --card-bg: #ffffff;
@@ -96,7 +98,7 @@
         }
         
         .status-logged-out {
-            color: #fbbc05;
+            color: var(--warning-color);
         }
         
         .btn {
@@ -162,6 +164,20 @@
             color: #5f6368;
             font-size: 0.875rem;
             border-top: 1px solid var(--border-color);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
         }
         
         @media (max-width: 600px) {
@@ -233,36 +249,117 @@
             
             // Função para verificar se o usuário está logado
             function checkLoginStatus() {
-                // Em um ambiente real, aqui seria feita uma verificação real
-                // Por enquanto, simularemos uma verificação
+                statusIcon.textContent = '⏳';
+                statusIcon.classList.add('loading');
+                statusText.textContent = 'Verificando status de login...';
                 
-                // Simulando uma verificação assíncrona
-                setTimeout(() => {
-                    // Para fins de demonstração, vamos assumir que o usuário não está logado
-                    // Em produção, você implementaria a lógica real de verificação
+                // Tentativa 1: Verificar se há sessão ativa no Google
+                checkGoogleSession();
+            }
+            
+            // Verificar sessão do Google
+            function checkGoogleSession() {
+                // Tentamos carregar a API do Google para verificar o login
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.onload = function() {
+                    gapi.load('auth2', function() {
+                        try {
+                            // Tentamos inicializar o auth2
+                            const auth2 = gapi.auth2.init({
+                                client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
+                                scope: 'profile email'
+                            });
+                            
+                            // Verificamos se há um usuário logado
+                            if (auth2.isSignedIn.get()) {
+                                const user = auth2.currentUser.get();
+                                const profile = user.getBasicProfile();
+                                const email = profile.getEmail();
+                                
+                                // Verificamos se é um email institucional
+                                if (email.endsWith('@joinville.sc.gov.br')) {
+                                    setLoggedInState(true, email);
+                                } else {
+                                    setLoggedInState(false, 'Conta logada não é institucional');
+                                }
+                            } else {
+                                setLoggedInState(false, 'Nenhuma conta Google logada');
+                            }
+                        } catch (error) {
+                            // Se a inicialização falhar, tentamos outro método
+                            checkWithIframe();
+                        }
+                    });
+                };
+                script.onerror = function() {
+                    // Se não conseguir carregar a API, tenta outro método
+                    checkWithIframe();
+                };
+                document.head.appendChild(script);
+            }
+            
+            // Método alternativo: verificar com iframe
+            function checkWithIframe() {
+                const iframe = document.createElement('iframe');
+                iframe.src = 'https://accounts.google.com/CheckCookie?continue=https://drive.google.com';
+                iframe.style.display = 'none';
+                
+                iframe.onload = function() {
+                    // Se o iframe carregar com sucesso, provavelmente está logado
+                    // Mas não podemos garantir que é a conta institucional
                     
-                    const isLoggedIn = false; // Simulação - altere para true para testar o outro estado
-                    
-                    if (isLoggedIn) {
-                        // Usuário está logado
-                        statusIcon.textContent = '✅';
-                        statusIcon.classList.add('status-logged-in');
-                        statusText.textContent = 'Você está logado com uma conta institucional.';
-                        accessBtn.disabled = false;
-                    } else {
-                        // Usuário não está logado
-                        statusIcon.textContent = '⚠️';
-                        statusIcon.classList.add('status-logged-out');
-                        statusText.textContent = 'Você não está logado com uma conta institucional.';
-                        accessBtn.disabled = true;
-                    }
-                }, 1500);
+                    // Tentamos acessar o app para ver se funciona
+                    testAppAccess();
+                };
+                
+                iframe.onerror = function() {
+                    setLoggedInState(false, 'Não logado em conta Google');
+                };
+                
+                document.body.appendChild(iframe);
+            }
+            
+            // Testar acesso ao app
+            function testAppAccess() {
+                fetch(appUrl, { 
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    credentials: 'include'
+                })
+                .then(() => {
+                    // Se a requisição não falhou, provavelmente temos acesso
+                    setLoggedInState(true, 'Logado com conta institucional');
+                })
+                .catch(() => {
+                    // Se falhou, provavelmente não temos acesso
+                    setLoggedInState(false, 'Não tem acesso ao sistema');
+                });
+            }
+            
+            // Definir estado de login
+            function setLoggedInState(isLoggedIn, message) {
+                statusIcon.classList.remove('loading');
+                
+                if (isLoggedIn) {
+                    statusIcon.textContent = '✅';
+                    statusIcon.classList.add('status-logged-in');
+                    statusText.textContent = message;
+                    accessBtn.disabled = false;
+                    accessBtn.textContent = 'Acessar Sistema';
+                } else {
+                    statusIcon.textContent = '⚠️';
+                    statusIcon.classList.add('status-logged-out');
+                    statusText.textContent = message;
+                    accessBtn.disabled = true;
+                }
             }
             
             // Função para adicionar conta do Google
             function addGoogleAccount() {
-                // URL para adicionar conta do Google
-                const addAccountUrl = 'https://accounts.google.com/AddSession?continue=' + encodeURIComponent(appUrl);
+                // URL para adicionar conta do Google com redirecionamento para o GitHub
+                const githubPagesUrl = window.location.origin; // URL atual do GitHub Pages
+                const addAccountUrl = `https://accounts.google.com/AddSession?continue=${encodeURIComponent(githubPagesUrl)}`;
                 
                 // Abre uma nova janela para adicionar conta
                 const accountWindow = window.open(addAccountUrl, 'Adicionar Conta Google', 'width=600,height=600');
@@ -272,7 +369,7 @@
                     if (accountWindow.closed) {
                         clearInterval(checkWindowClosed);
                         // Quando a janela é fechada, verifica novamente o status de login
-                        checkLoginStatus();
+                        setTimeout(checkLoginStatus, 1000);
                     }
                 }, 500);
             }
