@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Institucional - Prefeitura de Joinville</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏢</text></svg>">
 </head>
 <body>
     <div class="container">
         <header>
-            <img src="logo.png" alt="Logo Joinville" class="logo">
+            <div class="logo">🏢</div>
             <h1>Sistema Institucional</h1>
             <p class="domain-required">@joinville.sc.gov.br</p>
         </header>
@@ -23,7 +23,7 @@
                     <div class="option-card" onclick="selectAccount('institutional')">
                         <div class="option-icon">🏢</div>
                         <h3>Conta Institucional</h3>
-                        <p>@joinville.sc.gov.br</p>
+                        <p>Usar conta @joinville.sc.gov.br já logada</p>
                         <div class="checkmark"></div>
                     </div>
                     
@@ -35,9 +35,11 @@
                     </div>
                 </div>
 
-                <div class="selected-account" id="selectedAccount" style="display: none;">
+                <div class="selected-account" id="selectedAccount">
                     <h4>Conta Selecionada:</h4>
-                    <div class="account-info" id="accountInfo"></div>
+                    <div class="account-info" id="accountInfo">
+                        Nenhuma conta selecionada
+                    </div>
                 </div>
             </div>
 
@@ -45,7 +47,7 @@
                 <button class="btn btn-switch" onclick="switchAccount()">
                     🔄 Trocar/Adicionar Conta Google
                 </button>
-                <button class="btn btn-access" onclick="handleAccess()" id="accessBtn">
+                <button class="btn btn-access" onclick="handleAccess()" id="accessBtn" disabled>
                     ✅ Acessar Sistema
                 </button>
             </div>
@@ -53,31 +55,53 @@
             <div class="instructions">
                 <h4>💡 Como funciona:</h4>
                 <ul>
-                    <li>Selecione "Adicionar Conta" para trocar sem fazer logout</li>
-                    <li>O Google permitirá escolher entre contas existentes ou adicionar nova</li>
-                    <li>Seu login atual será mantido</li>
-                    <li>Após trocar, retorne e acesse o sistema</li>
+                    <li><strong>Conta Institucional:</strong> Acessa diretamente com a conta já logada</li>
+                    <li><strong>Adicionar Conta:</strong> Abre o seletor do Google para escolher outra conta</li>
+                    <li><strong>Não é necessário logout:</strong> Mantenha todas as suas contas ativas</li>
+                    <li><strong>Multiplataforma:</strong> Funciona em desktop e mobile</li>
                 </ul>
             </div>
 
-            <div class="mobile-section">
-                <h4>📱 Acesso Mobile</h4>
-                <button class="btn btn-mobile" onclick="openAccountSwitchMobile()">
-                    Trocar Conta no Mobile
-                </button>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🔒</div>
+                    <h4>Seguro</h4>
+                    <p>Usa o sistema oficial do Google para troca de contas</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h4>Rápido</h4>
+                    <p>Troque de conta em poucos cliques sem fazer logout</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h4>Mobile</h4>
+                    <p>Otimizado para dispositivos móveis</p>
+                </div>
             </div>
 
             <div class="help-section">
                 <details>
-                    <summary>🆘 Precisa de ajuda com contas?</summary>
+                    <summary>🆘 Precisa de ajuda?</summary>
                     <div class="help-content">
-                        <p><strong>Gerencie múltiplas contas Google:</strong></p>
-                        <ul>
-                            <li>Você pode ter várias contas logadas simultaneamente</li>
-                            <li>Selecione qual usar em cada acesso</li>
-                            <li>Não é necessário fazer logout da conta atual</li>
-                            <li>Ideal para quem usa conta pessoal e institucional</li>
-                        </ul>
+                        <div class="help-grid">
+                            <div class="help-item">
+                                <h5>Não consigo trocar de conta</h5>
+                                <p>Use o botão "Trocar/Adicionar Conta Google" para abrir o seletor oficial</p>
+                            </div>
+                            <div class="help-item">
+                                <h5>Acesso negado</h5>
+                                <p>Verifique se está usando conta @joinville.sc.gov.br</p>
+                            </div>
+                            <div class="help-item">
+                                <h5>Problemas no mobile</h5>
+                                <p>Use o navegador Chrome e permita pop-ups</p>
+                            </div>
+                            <div class="help-item">
+                                <h5>Múltiplas contas</h5>
+                                <p>Você pode ter várias contas Google logadas simultaneamente</p>
+                            </div>
+                        </div>
                     </div>
                 </details>
             </div>
@@ -88,6 +112,8 @@
             <p class="version">v2.0 - Sistema de Troca de Contas</p>
         </footer>
     </div>
+
+    <div id="notificationContainer" class="notification-container"></div>
 
     <script src="script.js"></script>
 </body>
